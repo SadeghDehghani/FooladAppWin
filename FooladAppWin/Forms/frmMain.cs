@@ -74,23 +74,70 @@ namespace FooladAppWin.Forms
                 {
                     for (int col = 1; col <= 6; col++)
                     {
-                        personSheet.Cell(row, col).Clear(XLClearOptions.Contents);
+                       // personSheet.Cell(row, col).Clear(XLClearOptions.Contents);
                     }
                 }
 
-                int dataRow = 3;
-                foreach (var record in group)
-                {
-                    if (dataRow > 48) break;
 
-                    personSheet.Cell(dataRow, 1).Value = record.PersonnelNumber;
-                    personSheet.Cell(dataRow, 2).Value = record.FullName;
-                    personSheet.Cell(dataRow, 3).Value = record.Date.ToString();
-                    personSheet.Cell(dataRow, 4).Value = record.Day;
-                    personSheet.Cell(dataRow, 5).Value = record.Time;
-                    personSheet.Cell(dataRow, 6).Value = record.Status;
+
+                //int dataRow = 3;
+                //foreach (var record in group)
+                //{
+                //    if (dataRow > 48) break;
+
+
+                 
+
+                //    personSheet.Cell(dataRow, 1).Value = record.PersonnelNumber;
+                //    personSheet.Cell(dataRow, 2).Value = record.FullName;
+                //    personSheet.Cell(dataRow, 3).Value = record.Date.ToString();
+                //    personSheet.Cell(dataRow, 4).Value = record.Day;
+                //    personSheet.Cell(dataRow, 5).Value = record.Time;
+                //    personSheet.Cell(dataRow, 6).Value = record.Status;
+
+
+                //    dataRow++;
+                //}
+
+
+
+                // گروه‌بندی بر اساس تاریخ
+                var dailyGroups = group
+                    .GroupBy(r => r.Date)
+                    .OrderBy(g => g.Key);
+
+                int dataRow = 3;
+                foreach (var dayGroup in dailyGroups)
+                {
+                    var entry = dayGroup.FirstOrDefault(r => r.Status == "ورود");
+                    var exit = dayGroup.FirstOrDefault(r => r.Status == "خروج");
+
+                    // ردیف ورود
+                    personSheet.Cell(dataRow, 1).Value = group.Key.PersonnelNumber;
+                    personSheet.Cell(dataRow, 2).Value = group.Key.FullName;
+                    personSheet.Cell(dataRow, 3).Value = dayGroup.Key;
+                    personSheet.Cell(dataRow, 4).Value = entry?.Day ?? "";
+                    personSheet.Cell(dataRow, 5).Value = entry?.Time ?? "0";
+                    personSheet.Cell(dataRow, 6).Value = "ورود";
                     dataRow++;
+
+                    // ردیف خروج
+                    personSheet.Cell(dataRow, 1).Value = group.Key.PersonnelNumber;
+                    personSheet.Cell(dataRow, 2).Value = group.Key.FullName;
+                    personSheet.Cell(dataRow, 3).Value = dayGroup.Key;
+                    personSheet.Cell(dataRow, 4).Value = exit?.Day ?? "";
+                    personSheet.Cell(dataRow, 5).Value = exit?.Time ?? "0";
+                    personSheet.Cell(dataRow, 6).Value = "خروج";
+                    dataRow++;
+
+                    if (dataRow > 48) break;
                 }
+
+
+
+
+
+
                 personSheet.RightToLeft = true;
                 RecordCount++;
             }
@@ -124,6 +171,9 @@ namespace FooladAppWin.Forms
             {
                 try
                 {
+
+       
+
                     var record = new PersonnelRecord
                     {
                         PersonnelNumber = int.Parse(worksheet.Cell(row, 1).GetValue<string>()),
@@ -133,6 +183,9 @@ namespace FooladAppWin.Forms
                         Time = worksheet.Cell(row, 5).GetValue<string>(),
                         Status = worksheet.Cell(row, 6).GetValue<string>()
                     };
+
+
+      
 
                     records.Add(record);
                 }
