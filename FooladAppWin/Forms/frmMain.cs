@@ -41,6 +41,7 @@ namespace FooladAppWin.Forms
             }
 
             var json = File.ReadAllText(jsonPath);
+
             var allRecords = JsonConvert.DeserializeObject<List<PersonnelRecord>>(json);
 
             var grouped = allRecords
@@ -54,13 +55,20 @@ namespace FooladAppWin.Forms
             var templateSheet = workbook.Worksheet("Sheet1");
 
             int RecordCount = 1;
+
             foreach (var group in grouped)
             {
                 string sheetName = $"{RecordCount.ToString()}_{group.Key.FullName}";
+
                 if (sheetName.Length > 31)
+
                     sheetName = sheetName.Substring(0, 31);
 
                 var personSheet = templateSheet.CopyTo(sheetName);
+
+                // 👇 اضافه کن تا نام در سلول A1 قرار بگیره
+                personSheet.Cell("A1").Value = group.Key.FullName;
+                personSheet.Cell("E1").Value = txtTitle.Text;
 
                 for (int row = 2; row <= 48; row++)
                 {
@@ -70,7 +78,7 @@ namespace FooladAppWin.Forms
                     }
                 }
 
-                int dataRow = 2;
+                int dataRow = 3;
                 foreach (var record in group)
                 {
                     if (dataRow > 48) break;
@@ -81,23 +89,17 @@ namespace FooladAppWin.Forms
                     personSheet.Cell(dataRow, 4).Value = record.Day;
                     personSheet.Cell(dataRow, 5).Value = record.Time;
                     personSheet.Cell(dataRow, 6).Value = record.Status;
-
                     dataRow++;
                 }
-
                 personSheet.RightToLeft = true;
-
                 RecordCount++;
             }
 
             // شیت الگو را تغییر نام داده و به اول منتقل کن
             templateSheet.Name = "الگو";
             templateSheet.Position = 1;
-
             workbook.SaveAs(outputPath);
-
             MessageBox.Show("خروجی اکسل با موفقیت ساخته شد.", "موفقیت", MessageBoxButtons.OK, MessageBoxIcon.Information);
-          
         }
 
         public  void ImportExcel()
