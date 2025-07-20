@@ -72,8 +72,9 @@
             // 
             // toolStripStatusLabel1
             // 
+            this.toolStripStatusLabel1.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(260, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(266, 17);
             this.toolStripStatusLabel1.Text = "توسعه دهنده: صادق دهقانی- sadegh-dehghani.ir";
             // 
             // btnOpenExplorer
