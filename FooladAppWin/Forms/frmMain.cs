@@ -260,7 +260,6 @@ namespace FooladAppWin.Forms
             return $"{year:0000}/{month:00}/{day:00}";
         }
 
-
         private string GetPersianDayName(DateTime date)
         {
             var pc = new System.Globalization.PersianCalendar();
@@ -278,7 +277,6 @@ namespace FooladAppWin.Forms
                 default: return "";
             }
         }
-
 
         private DateTime ParsePersianDate(string persianDate)
         {
@@ -306,9 +304,6 @@ namespace FooladAppWin.Forms
                 return false;
             }
         }
-
-
-
 
         public void ImportExcel()
         {
