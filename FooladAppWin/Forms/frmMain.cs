@@ -106,8 +106,14 @@ namespace FooladAppWin.Forms
                     personSheet.Cell(dataRow, 1).Value = person.PersonnelNumber;
                     personSheet.Cell(dataRow, 2).Value = person.FirstName + " " + person.LastName;
                     personSheet.Cell(dataRow, 3).Value = persianDateStr;
+                    personSheet.Cell(dataRow, 3).Style.NumberFormat.Format = "General"; // ساعت
                     personSheet.Cell(dataRow, 4).Value = dayOfWeekFa;
+
+                    personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "@";
                     personSheet.Cell(dataRow, 5).Value = entry?.Time ?? "";
+                    // personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "General"; // ساعت
+               
+
                     personSheet.Cell(dataRow, 6).Value = "ورود";
                     dataRow++;
 
@@ -115,8 +121,15 @@ namespace FooladAppWin.Forms
                     personSheet.Cell(dataRow, 1).Value = person.PersonnelNumber;
                     personSheet.Cell(dataRow, 2).Value = person.FirstName + " " + person.LastName;
                     personSheet.Cell(dataRow, 3).Value = persianDateStr;
+                    personSheet.Cell(dataRow, 3).Style.NumberFormat.Format = "General"; // ساعت
                     personSheet.Cell(dataRow, 4).Value = dayOfWeekFa;
+
+                    personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "@";
+
                     personSheet.Cell(dataRow, 5).Value = exit?.Time ?? "";
+                    // personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "General"; // ساعت
+                    //personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "hh:mm";
+                 
                     personSheet.Cell(dataRow, 6).Value = "خروج";
                     dataRow++;
                 }
