@@ -36,12 +36,13 @@
             this.btnAbout = new System.Windows.Forms.Button();
             this.txtTitle = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.btnPersonelInfo = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnExport
             // 
-            this.btnExport.Location = new System.Drawing.Point(48, 207);
+            this.btnExport.Location = new System.Drawing.Point(48, 216);
             this.btnExport.Name = "btnExport";
             this.btnExport.Size = new System.Drawing.Size(215, 34);
             this.btnExport.TabIndex = 0;
@@ -51,7 +52,7 @@
             // 
             // btnImport
             // 
-            this.btnImport.Location = new System.Drawing.Point(48, 133);
+            this.btnImport.Location = new System.Drawing.Point(48, 162);
             this.btnImport.Name = "btnImport";
             this.btnImport.Size = new System.Drawing.Size(215, 34);
             this.btnImport.TabIndex = 1;
@@ -66,7 +67,7 @@
             this.statusStrip1.Location = new System.Drawing.Point(0, 390);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.statusStrip1.Size = new System.Drawing.Size(329, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(362, 22);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -79,7 +80,7 @@
             // 
             // btnOpenExplorer
             // 
-            this.btnOpenExplorer.Location = new System.Drawing.Point(48, 267);
+            this.btnOpenExplorer.Location = new System.Drawing.Point(48, 280);
             this.btnOpenExplorer.Name = "btnOpenExplorer";
             this.btnOpenExplorer.Size = new System.Drawing.Size(215, 34);
             this.btnOpenExplorer.TabIndex = 3;
@@ -100,11 +101,11 @@
             // txtTitle
             // 
             this.txtTitle.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtTitle.Location = new System.Drawing.Point(12, 46);
+            this.txtTitle.Location = new System.Drawing.Point(12, 49);
             this.txtTitle.Multiline = true;
             this.txtTitle.Name = "txtTitle";
             this.txtTitle.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.txtTitle.Size = new System.Drawing.Size(305, 35);
+            this.txtTitle.Size = new System.Drawing.Size(343, 35);
             this.txtTitle.TabIndex = 5;
             // 
             // label1
@@ -116,12 +117,23 @@
             this.label1.TabIndex = 6;
             this.label1.Text = "عنوان لیست ماهیانه";
             // 
+            // btnPersonelInfo
+            // 
+            this.btnPersonelInfo.Location = new System.Drawing.Point(48, 105);
+            this.btnPersonelInfo.Name = "btnPersonelInfo";
+            this.btnPersonelInfo.Size = new System.Drawing.Size(215, 34);
+            this.btnPersonelInfo.TabIndex = 7;
+            this.btnPersonelInfo.Text = "خواندن ترتیب پرسنل اکسل";
+            this.btnPersonelInfo.UseVisualStyleBackColor = true;
+            this.btnPersonelInfo.Click += new System.EventHandler(this.btnPersonelInfo_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ButtonFace;
-            this.ClientSize = new System.Drawing.Size(329, 412);
+            this.ClientSize = new System.Drawing.Size(362, 412);
+            this.Controls.Add(this.btnPersonelInfo);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtTitle);
             this.Controls.Add(this.btnAbout);
@@ -152,5 +164,6 @@
         private System.Windows.Forms.Button btnAbout;
         private System.Windows.Forms.TextBox txtTitle;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button btnPersonelInfo;
     }
 }

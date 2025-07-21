@@ -58,6 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\PersonnelInfo.cs" />
     <Compile Include="Classes\PersonnelRecord.cs" />
     <Compile Include="Forms\frmMain.cs">
       <SubType>Form</SubType>

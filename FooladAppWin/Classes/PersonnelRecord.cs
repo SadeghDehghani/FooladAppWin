@@ -8,7 +8,7 @@ namespace FooladAppWin.Classes
 {
     public class PersonnelRecord
     {
-        public int PersonnelNumber { get; set; }
+        public string PersonnelNumber { get; set; }
         public string FullName { get; set; }
         public string  Date { get; set; }
         public string Day { get; set; }
