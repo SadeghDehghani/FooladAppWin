@@ -56,7 +56,7 @@
             this.btnImport.Name = "btnImport";
             this.btnImport.Size = new System.Drawing.Size(215, 34);
             this.btnImport.TabIndex = 1;
-            this.btnImport.Text = "خواندن اکسل";
+            this.btnImport.Text = "خواندن کارکرد از فایل اکسل";
             this.btnImport.UseVisualStyleBackColor = true;
             this.btnImport.Click += new System.EventHandler(this.btnImport_Click);
             // 
