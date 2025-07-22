@@ -25,125 +25,239 @@ namespace FooladAppWin.Forms
 
         private void btnExport_Click(object sender, EventArgs e)
         {
+  
             string mainPath = Application.StartupPath + "\\";
-
-            string jsonPath = mainPath + "data.json";
-            string personnelListPath = mainPath + "personnelList.json";
+            string dataPath = mainPath + "data.json";
+            string personnelPath = mainPath + "personnelList.json";
             string templatePath = mainPath + "template.xlsx";
             string outputPath = mainPath + "output.xlsx";
 
-            if (!File.Exists(jsonPath) || !File.Exists(templatePath) || !File.Exists(personnelListPath))
+
+            if (!File.Exists(personnelPath) || !File.Exists(dataPath))
             {
-                MessageBox.Show("یکی از فایل‌های json یا فایل قالب یا لیست پرسنل پیدا نشد.");
+                MessageBox.Show("فایل‌های JSON یافت نشدند.");
                 return;
             }
 
-            var json = File.ReadAllText(jsonPath);
-            var allRecords = JsonConvert.DeserializeObject<List<PersonnelRecord>>(json);
+            var personnelJson = File.ReadAllText(personnelPath);
+            var personnelList = JsonConvert.DeserializeObject<List<PersonnelInfo>>(personnelJson);
 
-            var personnelListJson = File.ReadAllText(personnelListPath);
-            var personnelList = JsonConvert.DeserializeObject<List<PersonnelInfo>>(personnelListJson);
-
-            // گروه‌بندی اطلاعات بر اساس کد پرسنلی
-            var groupedRecords = allRecords
-                .GroupBy(r => r.PersonnelNumber)
-                .ToDictionary(g => g.Key, g => g.ToList());
+            var dataJson = File.ReadAllText(dataPath);
+            var allRecords = JsonConvert.DeserializeObject<List<PersonnelRecord>>(dataJson);
 
              var templateStream = File.OpenRead(templatePath);
             var workbook = new XLWorkbook(templateStream);
             var templateSheet = workbook.Worksheet("Sheet1");
 
-            int recordCount = 1;
+            var pc = new PersianCalendar();
+            int currentYear = pc.GetYear(DateTime.Now);
+            int currentMonth = pc.GetMonth(DateTime.Now);
+
+            int RecordCount = 1;
 
             foreach (var person in personnelList.OrderBy(p => p.RowNumber))
             {
-                if (!groupedRecords.TryGetValue(person.PersonnelNumber, out var personRecords))
-                    continue;
+                var group = allRecords
+                    .Where(r => r.PersonnelNumber == person.PersonnelNumber)
+                    .ToList();
 
-                string sheetName = $"{recordCount}_{person.FirstName+" "+person.LastName}";
+                string sheetName = $"{person.RowNumber}_{person.FirstName+" "+person.LastName}";
                 if (sheetName.Length > 31)
                     sheetName = sheetName.Substring(0, 31);
 
                 var personSheet = templateSheet.CopyTo(sheetName);
                 personSheet.Cell("A1").Value = person.FirstName + " " + person.LastName;
                 personSheet.Cell("E1").Value = txtTitle.Text;
-
-
-                // درج شماره ردیف در سلول L56
                 personSheet.Cell("L56").Value = person.RowNumber;
+                personSheet.RightToLeft = true;
 
-
-                // گروه‌بندی داده‌ها بر اساس تاریخ
-                var recordsByDate = personRecords
+                // گروه‌بندی رکوردها بر اساس تاریخ
+                var recordsByDate = group
                     .GroupBy(r => r.Date)
                     .ToDictionary(g => g.Key, g => g.ToList());
 
-                var sampleDate = recordsByDate.Keys.FirstOrDefault();
-                if (sampleDate == null)
-                    continue;
-
+                // اگر هیچ رکوردی نیست، از تاریخ فعلی برای ساخت ماه استفاده می‌کنیم
+                string sampleDate = recordsByDate.Keys.FirstOrDefault() ?? $"{currentYear}/{currentMonth:00}/01";
                 var parts = sampleDate.Split('/');
                 int year = int.Parse(parts[0]);
                 int month = int.Parse(parts[1]);
 
-                var pc = new PersianCalendar();
                 int daysInMonth = pc.GetDaysInMonth(year, month);
-
                 int dataRow = 3;
+
+                string[] dayNames = { "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه" };
 
                 for (int day = 1; day <= daysInMonth; day++)
                 {
                     string persianDateStr = $"{year:0000}/{month:00}/{day:00}";
                     DateTime gregorianDate = pc.ToDateTime(year, month, day, 0, 0, 0, 0);
-                    string[] dayNames = { "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه" };
                     string dayOfWeekFa = dayNames[(int)gregorianDate.DayOfWeek];
 
-                    var records = recordsByDate.ContainsKey(persianDateStr) ? recordsByDate[persianDateStr] : new List<PersonnelRecord>();
+                    var records = recordsByDate.ContainsKey(persianDateStr)
+                        ? recordsByDate[persianDateStr]
+                        : new List<PersonnelRecord>();
+
                     var entry = records.FirstOrDefault(r => r.Status == "ورود");
                     var exit = records.FirstOrDefault(r => r.Status == "خروج");
 
-                    // ورود
+                    // ردیف ورود
                     personSheet.Cell(dataRow, 1).Value = person.PersonnelNumber;
                     personSheet.Cell(dataRow, 2).Value = person.FirstName + " " + person.LastName;
-                    personSheet.Cell(dataRow, 3).Value = persianDateStr;
+
                     personSheet.Cell(dataRow, 3).Style.NumberFormat.Format = "General"; // ساعت
+                    personSheet.Cell(dataRow, 3).Value = persianDateStr;
+
                     personSheet.Cell(dataRow, 4).Value = dayOfWeekFa;
-
-                    personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "@";
                     personSheet.Cell(dataRow, 5).Value = entry?.Time ?? "";
-                    // personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "General"; // ساعت
-               
-
+                    personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "@"; // تبدیل به Text
                     personSheet.Cell(dataRow, 6).Value = "ورود";
                     dataRow++;
 
-                    // خروج
+                    // ردیف خروج
                     personSheet.Cell(dataRow, 1).Value = person.PersonnelNumber;
-                    personSheet.Cell(dataRow, 2).Value = person.FirstName + " " + person.LastName;
+                    personSheet.Cell(dataRow, 2).Value = person.FirstName+" "+person.LastName;
                     personSheet.Cell(dataRow, 3).Value = persianDateStr;
                     personSheet.Cell(dataRow, 3).Style.NumberFormat.Format = "General"; // ساعت
                     personSheet.Cell(dataRow, 4).Value = dayOfWeekFa;
-
-                    personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "@";
-
                     personSheet.Cell(dataRow, 5).Value = exit?.Time ?? "";
-                    // personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "General"; // ساعت
-                    //personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "hh:mm";
-                 
+                    personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "@"; // تبدیل به Text
                     personSheet.Cell(dataRow, 6).Value = "خروج";
                     dataRow++;
                 }
 
-                personSheet.RightToLeft = true;
-                recordCount++;
+                RecordCount++;
             }
 
             templateSheet.Name = "الگو";
             templateSheet.Position = 1;
-
             workbook.SaveAs(outputPath);
-            MessageBox.Show("فایل اکسل با موفقیت ساخته شد.", "موفقیت", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("فایل خروجی با موفقیت ساخته شد.", "موفقیت", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
+
+
+
+        //private void btnExport_Click(object sender, EventArgs e)
+        //{
+        //    string mainPath = Application.StartupPath + "\\";
+
+        //    string jsonPath = mainPath + "data.json";
+        //    string personnelListPath = mainPath + "personnelList.json";
+        //    string templatePath = mainPath + "template.xlsx";
+        //    string outputPath = mainPath + "output.xlsx";
+
+        //    if (!File.Exists(jsonPath) || !File.Exists(templatePath) || !File.Exists(personnelListPath))
+        //    {
+        //        MessageBox.Show("یکی از فایل‌های json یا فایل قالب یا لیست پرسنل پیدا نشد.");
+        //        return;
+        //    }
+
+        //    var json = File.ReadAllText(jsonPath);
+        //    var allRecords = JsonConvert.DeserializeObject<List<PersonnelRecord>>(json);
+
+        //    var personnelListJson = File.ReadAllText(personnelListPath);
+        //    var personnelList = JsonConvert.DeserializeObject<List<PersonnelInfo>>(personnelListJson);
+
+        //    // گروه‌بندی اطلاعات بر اساس کد پرسنلی
+        //    var groupedRecords = allRecords
+        //        .GroupBy(r => r.PersonnelNumber)
+        //        .ToDictionary(g => g.Key, g => g.ToList());
+
+        //     var templateStream = File.OpenRead(templatePath);
+        //    var workbook = new XLWorkbook(templateStream);
+        //    var templateSheet = workbook.Worksheet("Sheet1");
+
+        //    int recordCount = 1;
+
+        //    foreach (var person in personnelList.OrderBy(p => p.RowNumber))
+        //    {
+        //        if (!groupedRecords.TryGetValue(person.PersonnelNumber, out var personRecords))
+        //            continue;
+
+        //        string sheetName = $"{recordCount}_{person.FirstName+" "+person.LastName}";
+        //        if (sheetName.Length > 31)
+        //            sheetName = sheetName.Substring(0, 31);
+
+        //        var personSheet = templateSheet.CopyTo(sheetName);
+        //        personSheet.Cell("A1").Value = person.FirstName + " " + person.LastName;
+        //        personSheet.Cell("E1").Value = txtTitle.Text;
+
+
+        //        // درج شماره ردیف در سلول L56
+        //        personSheet.Cell("L56").Value = person.RowNumber;
+
+
+        //        // گروه‌بندی داده‌ها بر اساس تاریخ
+        //        var recordsByDate = personRecords
+        //            .GroupBy(r => r.Date)
+        //            .ToDictionary(g => g.Key, g => g.ToList());
+
+        //        var sampleDate = recordsByDate.Keys.FirstOrDefault();
+        //        if (sampleDate == null)
+        //            continue;
+
+        //        var parts = sampleDate.Split('/');
+        //        int year = int.Parse(parts[0]);
+        //        int month = int.Parse(parts[1]);
+
+        //        var pc = new PersianCalendar();
+        //        int daysInMonth = pc.GetDaysInMonth(year, month);
+
+        //        int dataRow = 3;
+
+        //        for (int day = 1; day <= daysInMonth; day++)
+        //        {
+        //            string persianDateStr = $"{year:0000}/{month:00}/{day:00}";
+        //            DateTime gregorianDate = pc.ToDateTime(year, month, day, 0, 0, 0, 0);
+        //            string[] dayNames = { "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه" };
+        //            string dayOfWeekFa = dayNames[(int)gregorianDate.DayOfWeek];
+
+        //            var records = recordsByDate.ContainsKey(persianDateStr) ? recordsByDate[persianDateStr] : new List<PersonnelRecord>();
+        //            var entry = records.FirstOrDefault(r => r.Status == "ورود");
+        //            var exit = records.FirstOrDefault(r => r.Status == "خروج");
+
+        //            // ورود
+        //            personSheet.Cell(dataRow, 1).Value = person.PersonnelNumber;
+        //            personSheet.Cell(dataRow, 2).Value = person.FirstName + " " + person.LastName;
+        //            personSheet.Cell(dataRow, 3).Value = persianDateStr;
+        //            personSheet.Cell(dataRow, 3).Style.NumberFormat.Format = "General"; // ساعت
+        //            personSheet.Cell(dataRow, 4).Value = dayOfWeekFa;
+
+        //            personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "@";
+        //            personSheet.Cell(dataRow, 5).Value = entry?.Time ?? "";
+        //            // personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "General"; // ساعت
+
+
+        //            personSheet.Cell(dataRow, 6).Value = "ورود";
+        //            dataRow++;
+
+        //            // خروج
+        //            personSheet.Cell(dataRow, 1).Value = person.PersonnelNumber;
+        //            personSheet.Cell(dataRow, 2).Value = person.FirstName + " " + person.LastName;
+        //            personSheet.Cell(dataRow, 3).Value = persianDateStr;
+        //            personSheet.Cell(dataRow, 3).Style.NumberFormat.Format = "General"; // ساعت
+        //            personSheet.Cell(dataRow, 4).Value = dayOfWeekFa;
+
+        //            personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "@";
+
+        //            personSheet.Cell(dataRow, 5).Value = exit?.Time ?? "";
+        //            // personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "General"; // ساعت
+        //            //personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "hh:mm";
+
+        //            personSheet.Cell(dataRow, 6).Value = "خروج";
+        //            dataRow++;
+        //        }
+
+        //        personSheet.RightToLeft = true;
+        //        recordCount++;
+        //    }
+
+        //    templateSheet.Name = "الگو";
+        //    templateSheet.Position = 1;
+
+        //    workbook.SaveAs(outputPath);
+        //    MessageBox.Show("فایل اکسل با موفقیت ساخته شد.", "موفقیت", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //}
 
         //    private void btnExport_Click(object sender, EventArgs e)
         //    {
