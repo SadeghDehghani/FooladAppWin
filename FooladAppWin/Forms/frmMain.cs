@@ -109,9 +109,24 @@ namespace FooladAppWin.Forms
 
                     personSheet.Cell(dataRow, 4).Value = dayOfWeekFa;
 
-                    personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "@"; // تبدیل به Text
-                    personSheet.Cell(dataRow, 5).Value = entry?.Time ?? "";
-              
+                    // personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "@"; // تبدیل به Text
+                    // personSheet.Cell(dataRow, 5).Value = entry?.Time ?? "";
+
+
+
+                    // تبدیل زمان ورود به Time واقعی
+                    if (TimeSpan.TryParse(entry?.Time, out TimeSpan entryTime))
+                    {
+                        personSheet.Cell(dataRow, 5).Value = DateTime.Today.Add(entryTime); // یا new DateTime(1,1,1).Add(entryTime)
+                        personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "hh:mm";
+                    }
+                    else
+                    {
+                        personSheet.Cell(dataRow, 5).Value = "";
+                    }
+
+                
+
                     personSheet.Cell(dataRow, 6).Value = "ورود";
                     dataRow++;
 
@@ -123,9 +138,22 @@ namespace FooladAppWin.Forms
                     personSheet.Cell(dataRow, 4).Value = dayOfWeekFa;
 
 
-                    personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "@"; // تبدیل به Text
-                    personSheet.Cell(dataRow, 5).Value = exit?.Time ?? "";
-          
+                    //personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "@"; // تبدیل به Text
+                    //personSheet.Cell(dataRow, 5).Value = exit?.Time ?? "";
+
+
+                    // تبدیل زمان خروج به Time واقعی
+                    if (TimeSpan.TryParse(exit?.Time, out TimeSpan exitTime))
+                    {
+                        personSheet.Cell(dataRow, 5).Value = DateTime.Today.Add(exitTime);
+                        personSheet.Cell(dataRow, 5).Style.NumberFormat.Format = "hh:mm";
+                    }
+                    else
+                    {
+                        personSheet.Cell(dataRow, 5).Value = "";
+                    }
+
+         
                     personSheet.Cell(dataRow, 6).Value = "خروج";
                     dataRow++;
                 }
